@@ -1,0 +1,112 @@
+networks:
+  spark-network:
+    name: spark-network
+  kafka-network:
+    name: kafka-network
+
+services:
+  # --- SPARK MASTER SERVICE: Responsible for building the custom image ---
+  spark-master:
+    build:
+      context: . # Set context to project root
+      dockerfile: Dockerfile # Point to Dockerfile location
+    image: final-spark-image # Custom image name for the final project
+    container_name: spark-master
+    hostname: spark-master
+    environment:
+      - SPARK_MODE=master
+      - SPARK_MASTER_HOST=spark-master
+      - SPARK_MASTER_PORT=7077
+      - SPARK_UI_PORT=8080
+      - JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+    ports:
+      - "8080:8080" # Spark Master Web UI
+      - "7077:7077" # Spark Master RPC
+      - "4040:4040" # Spark App UI
+      - "8888:8888" # Streamlit Dashboard
+    volumes:
+      - ../:/workspace # Mount the entire project folder
+    networks:
+      - spark-network
+      - kafka-network
+    command: >
+      bash -c "/opt/spark/sbin/start-master.sh && tail -f /dev/null"
+
+  # --- SPARK WORKER 1 SERVICE (2GB / 2 Cores) ---
+  spark-worker-1:
+    image: final-spark-image
+    container_name: spark-worker-1
+    hostname: spark-worker-1
+    depends_on:
+      - spark-master
+    environment:
+      - SPARK_MODE=worker
+      - SPARK_MASTER=spark://spark-master:7077
+      - JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+      # Resource Configuration (Part 1 Step 6)
+      - SPARK_WORKER_CORES=2
+      - SPARK_WORKER_MEMORY=2g
+      - SPARK_EXECUTOR_MEMORY=2g # Worker 1 allocation
+      - SPARK_EXECUTOR_CORES=2
+    volumes:
+      - ../:/workspace
+    networks:
+      - spark-network
+      - kafka-network
+    command: >
+      bash -c "/opt/spark/sbin/start-worker.sh spark://spark-master:7077 && tail -f /dev/null"
+
+  # --- SPARK WORKER 2 SERVICE (4GB / 4 Cores) ---
+  spark-worker-2:
+    image: final-spark-image
+    container_name: spark-worker-2
+    hostname: spark-worker-2
+    depends_on:
+      - spark-master
+    environment:
+      - SPARK_MODE=worker
+      - SPARK_MASTER=spark://spark-master:7077
+      - JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+      # Resource Configuration (Part 1 Step 6)
+      - SPARK_WORKER_CORES=4
+      - SPARK_WORKER_MEMORY=4g
+      - SPARK_EXECUTOR_MEMORY=4g # Worker 2 allocation
+      - SPARK_EXECUTOR_CORES=4
+    volumes:
+      - ../:/workspace
+    networks:
+      - spark-network
+      - kafka-network
+    command: >
+      bash -c "/opt/spark/sbin/start-worker.sh spark://spark-master:7077 && tail -f /dev/null"
+
+  # --- KAFKA/ZOOKEEPER SERVICES (Using Confluent OSS Images) ---
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.3
+    hostname: zookeeper
+    container_name: zookeeper
+    ports:
+      - "2181:2181"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    networks:
+      - kafka-network
+
+  kafka:
+    image: confluentinc/cp-kafka:7.5.3
+    hostname: kafka
+    container_name: kafka
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    depends_on:
+      - zookeeper
+    networks:
+      - kafka-network

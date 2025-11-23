@@ -205,3 +205,68 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# =============================================
+# 1. PYTHON & ENVIRONMENT
+# =============================================
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+.env
+.venv/
+.envrc
+.DS_Store
+
+# =============================================
+# 2. NOTEBOOKS
+# =============================================
+.ipynb_checkpoints/
+**/.ipynb_checkpoints/
+
+# =============================================
+# 3. DATA (LARGE / RAW / GENERATED)
+# =============================================
+data/*
+
+# ignore all CSVs in data/ except explicitly allowed
+data/**/*.csv
+
+# =============================================
+# 4. REPORTS / DOCUMENTS
+# =============================================
+reports/
+*.docx
+*.pdf
+*.pptx
+
+# =============================================
+# 5. LOGS
+# =============================================
+*.log
+logs/
+spark-warehouse/
+tmp/
+tmp/**
+
+# Spark temp files
+/tmp/spark-*/
+
+# =============================================
+# 6. DOCKER / BUILD / KAFKA
+# =============================================
+# DO NOT IGNORE Dockerfile or docker-compose.yml
+# But ignore runtime logs or temp directories
+
+docker/                    # only if you store build artifacts in a docker folder
+!Dockerfile
+!docker-compose.yml
+
+# Kafka/Zookeeper temp logs
+kafka-logs/
+zookeeper/
+zookeeper-logs/
+
+# ==================
+
