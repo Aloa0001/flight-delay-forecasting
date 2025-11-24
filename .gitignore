@@ -109,3 +109,12 @@ dist/
 notes/
 screenshots/
 report_draft/
+
+
+# =========================
+# 11. Models and checkpoints
+# =========================
+*_SUCCESS*
+*.crc
+/models/
+/checkpoints/

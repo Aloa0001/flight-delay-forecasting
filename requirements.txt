@@ -2,3 +2,15 @@ pyspark==3.5.0
 streamlit==1.29.0
 pandas==2.1.4  # For data handling
 numpy==1.26.2  # For ML
+matplotlib==3.8.0  # For data visualization
+seaborn==0.12.3  # For statistical data visualization
+scikit-learn==1.3.2  # For machine learning algorithms
+xgboost==1.7.6  # For gradient boosting algorithms
+lightgbm==4.2.1  # For gradient boosting framework
+catboost==1.2  # For gradient boosting on decision trees
+plotly==5.16.1  # For interactive visualizations
+altair==5.0.1  # For declarative statistical visualization
+statsmodels==0.14.0  # For statistical modeling
+jupyterlab==4.0.4  # For interactive development environment
+notebook==6.5.4  # For Jupyter notebooks
+ipykernel==6.25.2  # For Jupyter kernel support
